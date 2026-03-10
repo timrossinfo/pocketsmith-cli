@@ -43,7 +43,7 @@ async function request<T>(method: string, path: string, options?: RequestOptions
     response = await fetch(url.toString(), init);
   } catch {
     console.error('Could not connect to PocketSmith API.');
-    process.exit(1);
+    return process.exit(1) as never;
   }
 
   if (!response.ok) {
@@ -57,15 +57,15 @@ async function request<T>(method: string, path: string, options?: RequestOptions
 
     if (response.status === 401) {
       console.error('Invalid API key.');
-      process.exit(1);
+      return process.exit(1) as never;
     }
     if (response.status === 404) {
       console.error(`Resource not found: ${path}`);
-      process.exit(1);
+      return process.exit(1) as never;
     }
     if (response.status === 429) {
       console.error('Rate limited. Please try again later.');
-      process.exit(1);
+      return process.exit(1) as never;
     }
 
     throw new ApiError(response.status, message);
@@ -117,7 +117,7 @@ async function paginatedRequest<T>(
 
     if (response.status === 401) {
       console.error('Invalid API key.');
-      process.exit(1);
+      return process.exit(1) as never;
     }
 
     throw new ApiError(response.status, message);

@@ -30,7 +30,7 @@ export function getApiKey(): string {
   if (config.api_key) return config.api_key;
 
   console.error('No API key found. Run `pocketsmith config set-key` or set POCKETSMITH_API_KEY.');
-  process.exit(1);
+  return process.exit(1) as never;
 }
 
 export function saveApiKey(key: string): void {
