@@ -25,10 +25,18 @@ export function registerTransactionsCommands(program: Command) {
     .option('--until <date>', 'End date (YYYY-MM-DD)')
     .option('--search <term>', 'Search term')
     .option('--page <n>', 'Page number')
-    .option('--per-page <n>', 'Results per page')
+    .option('--per-page <n>', 'Results per page (10-100)')
     .option('--all', 'Fetch all pages')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
+
+      if (opts.perPage) {
+        const perPage = parseInt(opts.perPage, 10);
+        if (perPage < 10 || perPage > 100) {
+          console.error('--per-page must be between 10 and 100.');
+          return process.exit(1) as never;
+        }
+      }
 
       const params: Record<string, string | number | boolean | undefined> = {
         start_date: opts.since,

@@ -18,15 +18,21 @@ export function registerEventsCommands(program: Command) {
     .command('list')
     .description('List events')
     .option('--scenario <id>', 'Filter by scenario ID')
+    .requiredOption('--since <date>', 'Start date (YYYY-MM-DD)')
+    .requiredOption('--until <date>', 'End date (YYYY-MM-DD)')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
+      const params: Record<string, string | number | boolean | undefined> = {
+        start_date: opts.since,
+        end_date: opts.until,
+      };
 
       let data: Event[];
       if (opts.scenario) {
-        data = await api.get<Event[]>(`/scenarios/${opts.scenario}/events`);
+        data = await api.get<Event[]>(`/scenarios/${opts.scenario}/events`, params);
       } else {
         const userId = await getUserId(globalOpts.userId);
-        data = await api.get<Event[]>(`/users/${userId}/events`);
+        data = await api.get<Event[]>(`/users/${userId}/events`, params);
       }
 
       console.log(formatOutput(data, { json: globalOpts.json, columns }));

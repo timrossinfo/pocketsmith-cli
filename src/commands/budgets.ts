@@ -39,8 +39,8 @@ export function registerBudgetCommands(program: Command) {
     .description('Get budget summary')
     .requiredOption('--period <period>', 'Period: weeks, months, or years')
     .requiredOption('--interval <n>', 'Number of periods')
-    .option('--start-date <date>', 'Start date (YYYY-MM-DD)')
-    .option('--end-date <date>', 'End date (YYYY-MM-DD)')
+    .requiredOption('--start-date <date>', 'Start date (YYYY-MM-DD)')
+    .requiredOption('--end-date <date>', 'End date (YYYY-MM-DD)')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
       const userId = await getUserId(globalOpts.userId);
@@ -50,7 +50,7 @@ export function registerBudgetCommands(program: Command) {
         start_date: opts.startDate,
         end_date: opts.endDate,
       };
-      const data = await api.get<BudgetSummary[]>(`/users/${userId}/budget-summary`, params);
+      const data = await api.get<BudgetSummary>(`/users/${userId}/budget_summary`, params);
       console.log(formatOutput(data, { json: globalOpts.json, columns: summaryColumns }));
     });
 
@@ -59,7 +59,8 @@ export function registerBudgetCommands(program: Command) {
     .description('Get trend analysis')
     .requiredOption('--period <period>', 'Period: weeks, months, or years')
     .requiredOption('--interval <n>', 'Number of periods')
-    .option('--categories <ids>', 'Comma-separated category IDs')
+    .requiredOption('--categories <ids>', 'Comma-separated category IDs')
+    .requiredOption('--scenarios <ids>', 'Comma-separated scenario IDs')
     .option('--start-date <date>', 'Start date (YYYY-MM-DD)')
     .option('--end-date <date>', 'End date (YYYY-MM-DD)')
     .action(async (opts, cmd) => {
@@ -69,10 +70,11 @@ export function registerBudgetCommands(program: Command) {
         period: opts.period,
         interval: opts.interval,
         categories: opts.categories,
+        scenarios: opts.scenarios,
         start_date: opts.startDate,
         end_date: opts.endDate,
       };
-      const data = await api.get<TrendAnalysis[]>(`/users/${userId}/trend-analysis`, params);
+      const data = await api.get<TrendAnalysis[]>(`/users/${userId}/trend_analysis`, params);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 
