@@ -10,6 +10,8 @@ argument-hint: [query or task]
 
 Use the `pocketsmith` CLI to query and manage PocketSmith data. Always use `--json` and pipe through `jq` for filtering or extracting specific fields.
 
+Always use the `pocketsmith` command directly if available.
+
 ## Quick reference
 
 ```bash
