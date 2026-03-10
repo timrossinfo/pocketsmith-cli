@@ -2,6 +2,7 @@
   "name": "pocketsmith",
   "version": "0.1.0",
   "description": "CLI tool for interacting with the PocketSmith API",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "pocketsmith": "dist/index.js"
