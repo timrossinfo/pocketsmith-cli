@@ -213,6 +213,59 @@ describe('api', () => {
       expect(result.currentPage).toBe(2);
     });
 
+    it('defaults to page 1 when no page param provided', async () => {
+      const headers = new Map([
+        ['total', '10'],
+        ['per-page', '10'],
+      ]);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([{ id: 1 }]),
+        headers: { get: (key: string) => headers.get(key) || null },
+      });
+
+      const { api } = await import('../api.js');
+      const result = await api.paginated('/users/1/transactions');
+
+      expect(result.currentPage).toBe(1);
+      expect(result.totalPages).toBe(1);
+    });
+
+    it('defaults to 1 total page when headers are missing', async () => {
+      const headers = new Map<string, string>();
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([{ id: 1 }]),
+        headers: { get: (key: string) => headers.get(key) || null },
+      });
+
+      const { api } = await import('../api.js');
+      const result = await api.paginated('/users/1/transactions');
+
+      expect(result.totalPages).toBe(1);
+      expect(result.currentPage).toBe(1);
+    });
+
+    it('calculates totalPages correctly with partial last page', async () => {
+      const headers = new Map([
+        ['total', '250'],
+        ['per-page', '100'],
+      ]);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([{ id: 1 }]),
+        headers: { get: (key: string) => headers.get(key) || null },
+      });
+
+      const { api } = await import('../api.js');
+      const result = await api.paginated('/users/1/transactions', { page: 1 });
+
+      expect(result.totalPages).toBe(3);
+    });
+
     it('fetchAll iterates through all pages', async () => {
       let callCount = 0;
       mockFetch.mockImplementation(() => {
@@ -233,7 +286,79 @@ describe('api', () => {
       const result = await api.fetchAll('/users/1/transactions');
 
       expect(result).toHaveLength(2);
+      expect(result).toEqual([{ id: 1 }, { id: 2 }]);
       expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('fetchAll passes page param on each request', async () => {
+      let callCount = 0;
+      mockFetch.mockImplementation(() => {
+        callCount++;
+        const headers = new Map([
+          ['total', '3'],
+          ['per-page', '1'],
+        ]);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve([{ id: callCount }]),
+          headers: { get: (key: string) => headers.get(key) || null },
+        });
+      });
+
+      const { api } = await import('../api.js');
+      await api.fetchAll('/users/1/transactions');
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+      for (let i = 1; i <= 3; i++) {
+        const calledUrl = mockFetch.mock.calls[i - 1][0];
+        expect(calledUrl).toContain(`page=${i}`);
+      }
+    });
+
+    it('fetchAll returns single page when total fits in one page', async () => {
+      const headers = new Map([
+        ['total', '5'],
+        ['per-page', '30'],
+      ]);
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([{ id: 1 }, { id: 2 }]),
+        headers: { get: (key: string) => headers.get(key) || null },
+      });
+
+      const { api } = await import('../api.js');
+      const result = await api.fetchAll('/users/1/transactions');
+
+      expect(result).toHaveLength(2);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetchAll preserves existing params across pages', async () => {
+      let callCount = 0;
+      mockFetch.mockImplementation(() => {
+        callCount++;
+        const headers = new Map([
+          ['total', '2'],
+          ['per-page', '1'],
+        ]);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve([{ id: callCount }]),
+          headers: { get: (key: string) => headers.get(key) || null },
+        });
+      });
+
+      const { api } = await import('../api.js');
+      await api.fetchAll('/users/1/transactions', { start_date: '2025-01-01', per_page: 1 });
+
+      for (const call of mockFetch.mock.calls) {
+        const calledUrl = call[0];
+        expect(calledUrl).toContain('start_date=2025-01-01');
+        expect(calledUrl).toContain('per_page=1');
+      }
     });
   });
 
