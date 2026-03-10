@@ -195,8 +195,8 @@ describe('api', () => {
   describe('pagination', () => {
     it('returns paginated result with page info', async () => {
       const headers = new Map([
-        ['x-total-pages', '5'],
-        ['x-current-page', '2'],
+        ['total', '150'],
+        ['per-page', '30'],
       ]);
       mockFetch.mockResolvedValue({
         ok: true,
@@ -218,8 +218,8 @@ describe('api', () => {
       mockFetch.mockImplementation(() => {
         callCount++;
         const headers = new Map([
-          ['x-total-pages', '2'],
-          ['x-current-page', String(callCount)],
+          ['total', '2'],
+          ['per-page', '1'],
         ]);
         return Promise.resolve({
           ok: true,

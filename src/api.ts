@@ -124,8 +124,10 @@ async function paginatedRequest<T>(
   }
 
   const data = await response.json() as T[];
-  const totalPages = parseInt(response.headers.get('x-total-pages') || '1', 10);
-  const currentPage = parseInt(response.headers.get('x-current-page') || '1', 10);
+  const total = parseInt(response.headers.get('total') || '0', 10);
+  const perPage = parseInt(response.headers.get('per-page') || '30', 10);
+  const totalPages = perPage > 0 ? Math.ceil(total / perPage) : 1;
+  const currentPage = params?.page ? Number(params.page) : 1;
 
   return { data, totalPages, currentPage };
 }
