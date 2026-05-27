@@ -58,7 +58,9 @@ export function registerCategoriesCommands(program: Command) {
     .option('--title <title>', 'Category title')
     .option('--colour <colour>', 'Category colour')
     .option('--is-transfer', 'Mark as transfer category')
+    .option('--no-is-transfer', 'Unmark as transfer category')
     .option('--is-bill', 'Mark as bill category')
+    .option('--no-is-bill', 'Unmark as bill category')
     .action(async (id: string, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
       const body: Record<string, unknown> = {};

@@ -112,6 +112,50 @@ describe('categories commands', () => {
 
       expect(api.put).toHaveBeenCalledWith('/categories/1', { title: 'Updated' });
     });
+
+    it('sets is_transfer true with --is-transfer', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1, is_transfer: true });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'categories', 'update', '1', '--is-transfer',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/categories/1', { is_transfer: true });
+    });
+
+    it('sets is_transfer false with --no-is-transfer', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1, is_transfer: false });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'categories', 'update', '1', '--no-is-transfer',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/categories/1', { is_transfer: false });
+    });
+
+    it('sets is_bill false with --no-is-bill', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1, is_bill: false });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'categories', 'update', '1', '--no-is-bill',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/categories/1', { is_bill: false });
+    });
+
+    it('omits is_transfer and is_bill when neither flag is set', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1, title: 'Renamed' });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'categories', 'update', '1', '--title', 'Renamed',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/categories/1', { title: 'Renamed' });
+    });
   });
 
   describe('delete', () => {
