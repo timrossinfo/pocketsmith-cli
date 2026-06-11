@@ -1,7 +1,8 @@
 import { Command } from 'commander';
-import { api, getUserId } from '../api.js';
+import { api } from '../api.js';
 import { formatOutput } from '../formatter.js';
 import type { Attachment } from '../types.js';
+import { listAttachments, getAttachment } from '../operations/attachments.js';
 
 const columns = [
   { key: 'id', header: 'ID' },
@@ -19,15 +20,10 @@ export function registerAttachmentsCommands(program: Command) {
     .option('--transaction <id>', 'List attachments for a transaction')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-
-      let data: Attachment[];
-      if (opts.transaction) {
-        data = await api.get<Attachment[]>(`/transactions/${opts.transaction}/attachments`);
-      } else {
-        const userId = await getUserId(globalOpts.userId);
-        data = await api.get<Attachment[]>(`/users/${userId}/attachments`);
-      }
-
+      const data = await listAttachments({
+        transactionId: opts.transaction,
+        userId: globalOpts.userId,
+      });
       console.log(formatOutput(data, { json: globalOpts.json, columns }));
     });
 
@@ -36,7 +32,7 @@ export function registerAttachmentsCommands(program: Command) {
     .description('Get attachment details')
     .action(async (id: string, _opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Attachment>(`/attachments/${id}`);
+      const data = await getAttachment(id);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 

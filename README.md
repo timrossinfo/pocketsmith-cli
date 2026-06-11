@@ -97,6 +97,33 @@ Invoke it directly with `/pocketsmith` or just ask a financial question — Clau
 
 The skill is defined in `.claude/skills/pocketsmith/SKILL.md`.
 
+## Use with Claude Desktop
+
+The CLI's functionality is also available as a Claude Desktop Extension, so you can ask
+Claude about your accounts, transactions, categories, and budgets directly.
+
+### Install
+
+1. Download `pocketsmith.mcpb` from the [latest release](https://github.com/timrossinfo/pocketsmith-cli/releases).
+2. In Claude Desktop, open **Settings → Extensions → Install Extension…** and choose the file
+   (or just double-click the file).
+3. When prompted, paste a PocketSmith developer key. Create one in PocketSmith under
+   **Settings → Security → Manage developer keys**. The key is stored in your OS keychain.
+
+### What Claude can do
+
+Read your user profile, accounts, transactions (with search and date filtering), categories,
+budgets and budget summaries, events, institutions, labels, currencies, and attachments.
+It can also create and update transactions and categories, and update budget events —
+Claude Desktop asks for confirmation before any change. The extension never deletes data.
+
+### Build from source
+
+```bash
+npm install
+npm run mcpb   # produces pocketsmith.mcpb
+```
+
 ## Development
 
 ```sh

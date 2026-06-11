@@ -1,4 +1,6 @@
 import { Command } from 'commander';
+import { ApiError, ConnectionError } from './api.js';
+import { ConfigError } from './config.js';
 import { registerConfigCommands } from './commands/config.js';
 import { registerMeCommands } from './commands/me.js';
 import { registerAccountsCommands } from './commands/accounts.js';
@@ -30,4 +32,19 @@ registerAttachmentsCommands(program);
 registerLabelsCommands(program);
 registerCurrenciesCommands(program);
 
-program.parse();
+async function main() {
+  try {
+    await program.parseAsync(process.argv);
+  } catch (err) {
+    if (err instanceof ApiError || err instanceof ConnectionError || err instanceof ConfigError) {
+      console.error(err.message);
+      process.exit(1);
+    }
+    throw err;
+  }
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -7,11 +7,25 @@ interface RequestOptions {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+export class ConnectionError extends Error {
+  constructor() {
+    super('Could not connect to PocketSmith API.');
+    this.name = 'ConnectionError';
+  }
+}
+
+function errorFromResponse(status: number, path: string, message: string): ApiError {
+  if (status === 401) return new ApiError(401, 'Invalid API key.');
+  if (status === 404) return new ApiError(404, `Resource not found: ${path}`);
+  if (status === 429) return new ApiError(429, 'Rate limited. Please try again later.');
+  return new ApiError(status, message);
 }
 
 async function request<T>(method: string, path: string, options?: RequestOptions): Promise<T> {
@@ -42,8 +56,7 @@ async function request<T>(method: string, path: string, options?: RequestOptions
   try {
     response = await fetch(url.toString(), init);
   } catch {
-    console.error('Could not connect to PocketSmith API.');
-    return process.exit(1) as never;
+    throw new ConnectionError();
   }
 
   if (!response.ok) {
@@ -55,20 +68,7 @@ async function request<T>(method: string, path: string, options?: RequestOptions
       message = response.statusText;
     }
 
-    if (response.status === 401) {
-      console.error('Invalid API key.');
-      return process.exit(1) as never;
-    }
-    if (response.status === 404) {
-      console.error(`Resource not found: ${path}`);
-      return process.exit(1) as never;
-    }
-    if (response.status === 429) {
-      console.error('Rate limited. Please try again later.');
-      return process.exit(1) as never;
-    }
-
-    throw new ApiError(response.status, message);
+    throw errorFromResponse(response.status, path, message);
   }
 
   if (response.status === 204) {
@@ -99,12 +99,17 @@ async function paginatedRequest<T>(
     }
   }
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      'X-Developer-Key': apiKey,
-      'Accept': 'application/json',
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      headers: {
+        'X-Developer-Key': apiKey,
+        'Accept': 'application/json',
+      },
+    });
+  } catch {
+    throw new ConnectionError();
+  }
 
   if (!response.ok) {
     let message: string;
@@ -115,12 +120,7 @@ async function paginatedRequest<T>(
       message = response.statusText;
     }
 
-    if (response.status === 401) {
-      console.error('Invalid API key.');
-      return process.exit(1) as never;
-    }
-
-    throw new ApiError(response.status, message);
+    throw errorFromResponse(response.status, path, message);
   }
 
   const data = await response.json() as T[];

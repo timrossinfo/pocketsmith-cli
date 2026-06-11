@@ -9,6 +9,13 @@ interface Config {
   api_key?: string;
 }
 
+export class ConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConfigError';
+  }
+}
+
 export function getConfigPath(): string {
   return CONFIG_FILE;
 }
@@ -29,8 +36,9 @@ export function getApiKey(): string {
   const config = readConfig();
   if (config.api_key) return config.api_key;
 
-  console.error('No API key found. Run `pocketsmith config set-key` or set POCKETSMITH_API_KEY.');
-  return process.exit(1) as never;
+  throw new ConfigError(
+    'No API key found. Run `pocketsmith config set-key` or set POCKETSMITH_API_KEY.',
+  );
 }
 
 export function saveApiKey(key: string): void {

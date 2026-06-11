@@ -1,7 +1,8 @@
 import { Command } from 'commander';
-import { api, getUserId } from '../api.js';
+import { api } from '../api.js';
 import { formatOutput } from '../formatter.js';
 import type { Event } from '../types.js';
+import { listEvents, getEvent, updateEvent } from '../operations/events.js';
 
 const columns = [
   { key: 'id', header: 'ID' },
@@ -22,19 +23,12 @@ export function registerEventsCommands(program: Command) {
     .requiredOption('--until <date>', 'End date (YYYY-MM-DD)')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const params: Record<string, string | number | boolean | undefined> = {
-        start_date: opts.since,
-        end_date: opts.until,
-      };
-
-      let data: Event[];
-      if (opts.scenario) {
-        data = await api.get<Event[]>(`/scenarios/${opts.scenario}/events`, params);
-      } else {
-        const userId = await getUserId(globalOpts.userId);
-        data = await api.get<Event[]>(`/users/${userId}/events`, params);
-      }
-
+      const data = await listEvents({
+        startDate: opts.since,
+        endDate: opts.until,
+        scenarioId: opts.scenario,
+        userId: globalOpts.userId,
+      });
       console.log(formatOutput(data, { json: globalOpts.json, columns }));
     });
 
@@ -43,7 +37,7 @@ export function registerEventsCommands(program: Command) {
     .description('Get event details')
     .action(async (id: string, _opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Event>(`/events/${id}`);
+      const data = await getEvent(id);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 
@@ -81,14 +75,13 @@ export function registerEventsCommands(program: Command) {
     .option('--note <note>', 'Event note')
     .action(async (id: string, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const body: Record<string, unknown> = {};
-      if (opts.amount) body.amount = opts.amount;
-      if (opts.date) body.date = opts.date;
-      if (opts.repeatType) body.repeat_type = opts.repeatType;
-      if (opts.repeatInterval) body.repeat_interval = parseInt(opts.repeatInterval, 10);
-      if (opts.note) body.note = opts.note;
-
-      const data = await api.put<Event>(`/events/${id}`, body);
+      const data = await updateEvent(id, {
+        amount: opts.amount,
+        date: opts.date,
+        repeatType: opts.repeatType,
+        repeatInterval: opts.repeatInterval ? parseInt(opts.repeatInterval, 10) : undefined,
+        note: opts.note,
+      });
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 

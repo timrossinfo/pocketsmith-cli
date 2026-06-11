@@ -1,0 +1,12 @@
+.git
+.github
+.claude
+node_modules
+src
+docs
+*.test.ts
+tsconfig.json
+tsup.config.ts
+package-lock.json
+CLAUDE.md
+*.mcpb

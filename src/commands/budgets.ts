@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { api, getUserId } from '../api.js';
 import { formatOutput } from '../formatter.js';
-import type { BudgetEvent, BudgetSummary, TrendAnalysis } from '../types.js';
+import { listBudget, getBudgetSummary, getTrendAnalysis } from '../operations/budgets.js';
 
 const budgetColumns = [
   { key: 'category.title', header: 'Category', width: 25 },
@@ -27,10 +27,7 @@ export function registerBudgetCommands(program: Command) {
     .option('--rollup', 'Include rolled-up amounts')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const userId = await getUserId(globalOpts.userId);
-      const params: Record<string, string | number | boolean | undefined> = {};
-      if (opts.rollup) params.roll_up = true;
-      const data = await api.get<BudgetEvent[]>(`/users/${userId}/budget`, params);
+      const data = await listBudget({ rollUp: opts.rollup, userId: globalOpts.userId });
       console.log(formatOutput(data, { json: globalOpts.json, columns: budgetColumns }));
     });
 
@@ -43,14 +40,13 @@ export function registerBudgetCommands(program: Command) {
     .requiredOption('--end-date <date>', 'End date (YYYY-MM-DD)')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const userId = await getUserId(globalOpts.userId);
-      const params: Record<string, string | number | boolean | undefined> = {
+      const data = await getBudgetSummary({
         period: opts.period,
         interval: opts.interval,
-        start_date: opts.startDate,
-        end_date: opts.endDate,
-      };
-      const data = await api.get<BudgetSummary>(`/users/${userId}/budget_summary`, params);
+        startDate: opts.startDate,
+        endDate: opts.endDate,
+        userId: globalOpts.userId,
+      });
       console.log(formatOutput(data, { json: globalOpts.json, columns: summaryColumns }));
     });
 
@@ -65,16 +61,15 @@ export function registerBudgetCommands(program: Command) {
     .option('--end-date <date>', 'End date (YYYY-MM-DD)')
     .action(async (opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const userId = await getUserId(globalOpts.userId);
-      const params: Record<string, string | number | boolean | undefined> = {
+      const data = await getTrendAnalysis({
         period: opts.period,
         interval: opts.interval,
         categories: opts.categories,
         scenarios: opts.scenarios,
-        start_date: opts.startDate,
-        end_date: opts.endDate,
-      };
-      const data = await api.get<TrendAnalysis[]>(`/users/${userId}/trend_analysis`, params);
+        startDate: opts.startDate,
+        endDate: opts.endDate,
+        userId: globalOpts.userId,
+      });
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 

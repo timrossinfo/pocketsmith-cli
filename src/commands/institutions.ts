@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { api, getUserId } from '../api.js';
 import { formatOutput } from '../formatter.js';
 import type { Institution } from '../types.js';
+import { listInstitutions, getInstitution } from '../operations/institutions.js';
 
 const columns = [
   { key: 'id', header: 'ID' },
@@ -18,8 +19,7 @@ export function registerInstitutionsCommands(program: Command) {
     .description('List all institutions')
     .action(async (_opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const userId = await getUserId(globalOpts.userId);
-      const data = await api.get<Institution[]>(`/users/${userId}/institutions`);
+      const data = await listInstitutions(globalOpts.userId);
       console.log(formatOutput(data, { json: globalOpts.json, columns }));
     });
 
@@ -28,7 +28,7 @@ export function registerInstitutionsCommands(program: Command) {
     .description('Get institution details')
     .action(async (id: string, _opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Institution>(`/institutions/${id}`);
+      const data = await getInstitution(id);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 

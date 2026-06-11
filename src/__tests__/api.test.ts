@@ -9,8 +9,6 @@ vi.stubGlobal('fetch', mockFetch);
 
 beforeEach(() => {
   mockFetch.mockReset();
-  vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
-  vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -136,7 +134,7 @@ describe('api', () => {
   });
 
   describe('error handling', () => {
-    it('exits with error on 401', async () => {
+    it('throws ApiError with friendly message on 401', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
@@ -144,14 +142,14 @@ describe('api', () => {
         json: () => Promise.resolve({ error: 'Invalid key' }),
       });
 
-      const { api } = await import('../api.js');
-      await api.get('/me');
+      const { api, ApiError } = await import('../api.js');
+      const err = await api.get('/me').catch((e: unknown) => e);
 
-      expect(process.exit).toHaveBeenCalledWith(1);
-      expect(console.error).toHaveBeenCalledWith('Invalid API key.');
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as Error).message).toBe('Invalid API key.');
     });
 
-    it('exits with error on 404', async () => {
+    it('throws ApiError with path on 404', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 404,
@@ -160,13 +158,10 @@ describe('api', () => {
       });
 
       const { api } = await import('../api.js');
-      await api.get('/accounts/999');
-
-      expect(process.exit).toHaveBeenCalledWith(1);
-      expect(console.error).toHaveBeenCalledWith('Resource not found: /accounts/999');
+      await expect(api.get('/accounts/999')).rejects.toThrow('Resource not found: /accounts/999');
     });
 
-    it('exits with error on 429 rate limit', async () => {
+    it('throws ApiError on 429 rate limit', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 429,
@@ -175,20 +170,29 @@ describe('api', () => {
       });
 
       const { api } = await import('../api.js');
-      await api.get('/me');
-
-      expect(process.exit).toHaveBeenCalledWith(1);
-      expect(console.error).toHaveBeenCalledWith('Rate limited. Please try again later.');
+      await expect(api.get('/me')).rejects.toThrow('Rate limited. Please try again later.');
     });
 
-    it('exits on network error', async () => {
+    it('throws ConnectionError on network failure', async () => {
       mockFetch.mockRejectedValue(new Error('ECONNREFUSED'));
 
-      const { api } = await import('../api.js');
-      await api.get('/me');
+      const { api, ConnectionError } = await import('../api.js');
+      const err = await api.get('/me').catch((e: unknown) => e);
 
-      expect(process.exit).toHaveBeenCalledWith(1);
-      expect(console.error).toHaveBeenCalledWith('Could not connect to PocketSmith API.');
+      expect(err).toBeInstanceOf(ConnectionError);
+      expect((err as Error).message).toBe('Could not connect to PocketSmith API.');
+    });
+
+    it('throws ApiError on paginated 401', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        json: () => Promise.resolve({ error: 'Invalid key' }),
+      });
+
+      const { api } = await import('../api.js');
+      await expect(api.paginated('/users/1/transactions')).rejects.toThrow('Invalid API key.');
     });
   });
 

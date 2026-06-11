@@ -1,7 +1,13 @@
 import { Command } from 'commander';
-import { api, getUserId } from '../api.js';
+import { api } from '../api.js';
+import {
+  listTransactions,
+  listAllTransactions,
+  getTransaction,
+  createTransaction,
+  updateTransaction,
+} from '../operations/transactions.js';
 import { formatOutput } from '../formatter.js';
-import type { Transaction } from '../types.js';
 
 const columns = [
   { key: 'id', header: 'ID' },
@@ -38,31 +44,22 @@ export function registerTransactionsCommands(program: Command) {
         }
       }
 
-      const params: Record<string, string | number | boolean | undefined> = {
-        start_date: opts.since,
-        end_date: opts.until,
+      const filters = {
+        accountId: opts.account,
+        categoryId: opts.category,
+        transactionAccountId: opts.transactionAccount,
+        startDate: opts.since,
+        endDate: opts.until,
         search: opts.search,
-        page: opts.page,
-        per_page: opts.perPage,
+        perPage: opts.perPage,
+        userId: globalOpts.userId,
       };
 
-      let path: string;
-      if (opts.account) {
-        path = `/accounts/${opts.account}/transactions`;
-      } else if (opts.category) {
-        path = `/categories/${opts.category}/transactions`;
-      } else if (opts.transactionAccount) {
-        path = `/transaction-accounts/${opts.transactionAccount}/transactions`;
-      } else {
-        const userId = await getUserId(globalOpts.userId);
-        path = `/users/${userId}/transactions`;
-      }
-
       if (opts.all) {
-        const data = await api.fetchAll<Transaction>(path, params);
+        const data = await listAllTransactions(filters);
         console.log(formatOutput(data, { json: globalOpts.json, columns }));
       } else {
-        const result = await api.paginated<Transaction>(path, params);
+        const result = await listTransactions({ ...filters, page: opts.page });
         console.log(formatOutput(result.data, { json: globalOpts.json, columns }));
         if (!globalOpts.json && result.totalPages > 1) {
           console.log(`\nPage ${result.currentPage} of ${result.totalPages}`);
@@ -75,7 +72,7 @@ export function registerTransactionsCommands(program: Command) {
     .description('Get transaction details')
     .action(async (id: string, _opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Transaction>(`/transactions/${id}`);
+      const data = await getTransaction(id);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 
@@ -90,19 +87,14 @@ export function registerTransactionsCommands(program: Command) {
     .option('--is-transfer', 'Mark as transfer')
     .action(async (transactionAccountId: string, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const body: Record<string, unknown> = {
+      const data = await createTransaction(transactionAccountId, {
         payee: opts.payee,
         amount: parseFloat(opts.amount),
         date: opts.date,
-      };
-      if (opts.note) body.note = opts.note;
-      if (opts.category) body.category_id = parseInt(opts.category, 10);
-      if (opts.isTransfer) body.is_transfer = true;
-
-      const data = await api.post<Transaction>(
-        `/transaction-accounts/${transactionAccountId}/transactions`,
-        body,
-      );
+        note: opts.note,
+        categoryId: opts.category ? parseInt(opts.category, 10) : undefined,
+        isTransfer: opts.isTransfer,
+      });
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 
@@ -117,15 +109,14 @@ export function registerTransactionsCommands(program: Command) {
     .option('--is-transfer', 'Mark as transfer')
     .action(async (id: string, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const body: Record<string, unknown> = {};
-      if (opts.payee) body.payee = opts.payee;
-      if (opts.amount) body.amount = parseFloat(opts.amount);
-      if (opts.date) body.date = opts.date;
-      if (opts.note) body.note = opts.note;
-      if (opts.category) body.category_id = parseInt(opts.category, 10);
-      if (opts.isTransfer !== undefined) body.is_transfer = opts.isTransfer;
-
-      const data = await api.put<Transaction>(`/transactions/${id}`, body);
+      const data = await updateTransaction(id, {
+        payee: opts.payee,
+        amount: opts.amount ? parseFloat(opts.amount) : undefined,
+        date: opts.date,
+        note: opts.note,
+        categoryId: opts.category ? parseInt(opts.category, 10) : undefined,
+        isTransfer: opts.isTransfer,
+      });
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 
