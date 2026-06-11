@@ -1,7 +1,6 @@
 import { Command } from 'commander';
-import { api } from '../api.js';
+import { getUser } from '../operations/me.js';
 import { formatOutput } from '../formatter.js';
-import type { User } from '../types.js';
 
 export function registerMeCommands(program: Command) {
   program
@@ -9,7 +8,7 @@ export function registerMeCommands(program: Command) {
     .description('Show the authenticated user')
     .action(async (_opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<User>('/me');
+      const data = await getUser();
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 }

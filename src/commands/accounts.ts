@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { api, getUserId } from '../api.js';
+import { api } from '../api.js';
+import { listAccounts, getAccount } from '../operations/accounts.js';
 import { formatOutput } from '../formatter.js';
 import type { Account } from '../types.js';
 
@@ -19,8 +20,7 @@ export function registerAccountsCommands(program: Command) {
     .description('List all accounts')
     .action(async (_opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const userId = await getUserId(globalOpts.userId);
-      const data = await api.get<Account[]>(`/users/${userId}/accounts`);
+      const data = await listAccounts(globalOpts.userId);
       console.log(formatOutput(data, { json: globalOpts.json, columns }));
     });
 
@@ -29,7 +29,7 @@ export function registerAccountsCommands(program: Command) {
     .description('Get account details')
     .action(async (id: string, _opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Account>(`/accounts/${id}`);
+      const data = await getAccount(id);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 
