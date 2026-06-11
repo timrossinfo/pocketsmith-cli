@@ -39,20 +39,15 @@ describe('getApiKey', () => {
     expect(getApiKey()).toBe('env-key-123');
   });
 
-  it('exits when no API key is configured', async () => {
+  it('throws ConfigError when no API key is configured', async () => {
     vi.mocked(fs.readFileSync).mockImplementation(() => {
       throw new Error('ENOENT');
     });
-    const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
-    const mockError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const { getApiKey } = await import('../config.js');
-    getApiKey();
+    const { getApiKey, ConfigError } = await import('../config.js');
 
-    expect(mockExit).toHaveBeenCalledWith(1);
-    expect(mockError).toHaveBeenCalledWith(
-      expect.stringContaining('No API key found'),
-    );
+    expect(() => getApiKey()).toThrow(ConfigError);
+    expect(() => getApiKey()).toThrow('No API key found');
   });
 });
 
