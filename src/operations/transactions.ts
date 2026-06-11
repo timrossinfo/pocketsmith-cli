@@ -65,8 +65,8 @@ export function createTransaction(
     amount: input.amount,
     date: input.date,
   };
-  if (input.note) body.note = input.note;
-  if (input.categoryId) body.category_id = input.categoryId;
+  if (input.note !== undefined) body.note = input.note;
+  if (input.categoryId != null) body.category_id = input.categoryId;
   if (input.isTransfer) body.is_transfer = true;
 
   return api.post<Transaction>(`/transaction-accounts/${transactionAccountId}/transactions`, body);
@@ -89,8 +89,8 @@ export function updateTransaction(
   if (input.payee) body.payee = input.payee;
   if (input.amount !== undefined) body.amount = input.amount;
   if (input.date) body.date = input.date;
-  if (input.note) body.note = input.note;
-  if (input.categoryId) body.category_id = input.categoryId;
+  if (input.note !== undefined) body.note = input.note;
+  if (input.categoryId != null) body.category_id = input.categoryId;
   if (input.isTransfer !== undefined) body.is_transfer = input.isTransfer;
 
   return api.put<Transaction>(`/transactions/${id}`, body);
