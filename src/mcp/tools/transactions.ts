@@ -38,12 +38,12 @@ const createTransactionInput = z.object({
 
 const updateTransactionInput = z.object({
   id: z.number().int().describe('Transaction ID'),
-  payee: z.string().optional(),
-  amount: z.number().optional(),
+  payee: z.string().optional().describe('Payee name'),
+  amount: z.number().optional().describe('Amount (negative for spending, positive for income)'),
   date: z.string().optional().describe('Transaction date (YYYY-MM-DD)'),
-  note: z.string().optional(),
+  note: z.string().optional().describe('Note'),
   category_id: z.number().int().optional().describe('Category ID'),
-  is_transfer: z.boolean().optional(),
+  is_transfer: z.boolean().optional().describe('Mark as a transfer'),
 });
 
 export function registerTransactionsTools(server: McpServer) {
