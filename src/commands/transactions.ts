@@ -8,7 +8,6 @@ import {
   updateTransaction,
 } from '../operations/transactions.js';
 import { formatOutput } from '../formatter.js';
-import type { Transaction } from '../types.js';
 
 const columns = [
   { key: 'id', header: 'ID' },
