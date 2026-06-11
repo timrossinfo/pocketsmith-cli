@@ -1,7 +1,6 @@
 import { Command } from 'commander';
-import { api } from '../api.js';
 import { formatOutput } from '../formatter.js';
-import type { Currency } from '../types.js';
+import { listCurrencies, getCurrency } from '../operations/currencies.js';
 
 const columns = [
   { key: 'id', header: 'Code' },
@@ -18,7 +17,7 @@ export function registerCurrenciesCommands(program: Command) {
     .description('List all supported currencies')
     .action(async (_opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Currency[]>('/currencies');
+      const data = await listCurrencies();
       console.log(formatOutput(data, { json: globalOpts.json, columns }));
     });
 
@@ -27,7 +26,7 @@ export function registerCurrenciesCommands(program: Command) {
     .description('Get currency details')
     .action(async (code: string, _opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
-      const data = await api.get<Currency>(`/currencies/${code}`);
+      const data = await getCurrency(code);
       console.log(formatOutput(data, { json: globalOpts.json }));
     });
 }
