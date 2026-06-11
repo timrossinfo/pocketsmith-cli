@@ -24,8 +24,8 @@ export async function createCategory(
   const id = await getUserId(userId);
   const body: Record<string, unknown> = { title: input.title };
   if (input.parentId != null) body.parent_id = input.parentId;
-  if (input.isTransfer) body.is_transfer = true;
-  if (input.isBill) body.is_bill = true;
+  if (input.isTransfer !== undefined) body.is_transfer = input.isTransfer;
+  if (input.isBill !== undefined) body.is_bill = input.isBill;
 
   return api.post<Category>(`/users/${id}/categories`, body);
 }

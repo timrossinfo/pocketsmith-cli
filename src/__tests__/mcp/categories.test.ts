@@ -48,6 +48,21 @@ describe('categories tools', () => {
     });
   });
 
+  it('create_category forwards explicit false flags', async () => {
+    vi.mocked(api.post).mockResolvedValue({ id: 5 });
+
+    const client = await createClient();
+    await client.callTool({
+      name: 'create_category',
+      arguments: { title: 'Plain', is_transfer: false },
+    });
+
+    expect(api.post).toHaveBeenCalledWith('/users/1/categories', {
+      title: 'Plain',
+      is_transfer: false,
+    });
+  });
+
   it('update_category supports clearing boolean flags', async () => {
     vi.mocked(api.put).mockResolvedValue({ id: 3 });
 

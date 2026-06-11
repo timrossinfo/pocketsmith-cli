@@ -67,7 +67,7 @@ export function createTransaction(
   };
   if (input.note !== undefined) body.note = input.note;
   if (input.categoryId != null) body.category_id = input.categoryId;
-  if (input.isTransfer) body.is_transfer = true;
+  if (input.isTransfer !== undefined) body.is_transfer = input.isTransfer;
 
   return api.post<Transaction>(`/transaction-accounts/${transactionAccountId}/transactions`, body);
 }
