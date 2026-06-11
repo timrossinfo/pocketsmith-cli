@@ -23,7 +23,7 @@
     "api_key": {
       "type": "string",
       "title": "PocketSmith API Key",
-      "description": "Create a new developer key in PocketSmith under Security & integrations > Manage developer keys, then copy and paste it here.",
+      "description": "Create a new developer key at https://my.pocketsmith.com/security/manage_keys (Security & integrations > Manage developer keys), then copy and paste it here.",
       "required": true,
       "sensitive": true
     }

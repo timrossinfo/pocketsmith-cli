@@ -107,9 +107,9 @@ Claude about your accounts, transactions, categories, and budgets directly.
 1. Download `pocketsmith.mcpb` from the [latest release](https://github.com/timrossinfo/pocketsmith-cli/releases).
 2. In Claude Desktop, open **Settings → Extensions → Install Extension…** and choose the file
    (or just double-click the file).
-3. When prompted, paste a PocketSmith developer key. Create a new key in PocketSmith under
-   **Security & integrations → Manage developer keys**, then copy and paste it into Claude.
-   The key is stored in your OS keychain.
+3. When prompted, paste a PocketSmith developer key. Create a new key under
+   [Security & integrations → Manage developer keys](https://my.pocketsmith.com/security/manage_keys),
+   then copy and paste it into Claude. The key is stored in your OS keychain.
 
 ### What Claude can do
 
