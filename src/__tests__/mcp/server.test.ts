@@ -13,7 +13,7 @@ vi.mock('../../api.js', () => ({
 }));
 
 import { api } from '../../api.js';
-import { createClient, textPayload } from './helpers.js';
+import { createClient, textPayload, errorText } from './helpers.js';
 
 beforeEach(() => {
   vi.mocked(api.get).mockReset();
@@ -49,7 +49,7 @@ describe('mcp server', () => {
 
     const failed = await client.callTool({ name: 'get_user', arguments: {} });
     expect(failed.isError).toBe(true);
-    expect((failed.content as { text: string }[])[0].text).toBe('Invalid API key.');
+    expect(errorText(failed)).toBe('Invalid API key.');
 
     const ok = await client.callTool({ name: 'get_user', arguments: {} });
     expect(ok.isError).toBeFalsy();

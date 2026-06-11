@@ -5,6 +5,7 @@ export default defineConfig({
   format: ['esm'],
   target: 'node22',
   clean: true,
+  splitting: false,
   noExternal: ['@modelcontextprotocol/sdk', 'zod'],
   banner: { js: '#!/usr/bin/env node' },
 });

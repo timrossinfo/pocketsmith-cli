@@ -1,5 +1,9 @@
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createServer } from './server.js';
 
-const server = createServer();
-await server.connect(new StdioServerTransport());
+createServer()
+  .connect(new StdioServerTransport())
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
