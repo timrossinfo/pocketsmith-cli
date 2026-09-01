@@ -33,6 +33,8 @@ pocketsmith transactions list --since 2024-01-01 --until 2024-12-31
 pocketsmith transactions list --account <id>
 pocketsmith transactions list --category <id>
 pocketsmith transactions list --search "coffee"
+pocketsmith transactions list --needs-review    # Flagged for review
+pocketsmith transactions list --uncategorized   # Missing a category
 pocketsmith transactions list --all     # All pages
 pocketsmith transactions list --page 2 --per-page 50
 ```
@@ -44,6 +46,8 @@ pocketsmith transactions create <transaction-account-id> \
   --payee "Store" --amount -45.50 --date 2024-03-15
 pocketsmith categories create --title "Groceries" --parent-id <id>
 pocketsmith institutions create --title "My Bank" --currency NZD
+pocketsmith transactions update <id> --category <category-id>
+pocketsmith transactions update <id> --no-needs-review   # Mark reviewed
 ```
 
 ## JSON output and jq
