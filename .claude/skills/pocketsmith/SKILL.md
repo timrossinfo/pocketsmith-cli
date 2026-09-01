@@ -20,6 +20,7 @@ pocketsmith accounts list               # All accounts
 pocketsmith accounts get <id>           # Account details
 pocketsmith transactions list           # Recent transactions
 pocketsmith categories list             # All categories
+pocketsmith category-rules list         # All category rules
 pocketsmith institutions list           # All institutions
 pocketsmith budgets summary --period months --interval 6
 pocketsmith labels list                 # All labels
@@ -45,6 +46,9 @@ pocketsmith transactions list --page 2 --per-page 50
 pocketsmith transactions create <transaction-account-id> \
   --payee "Store" --amount -45.50 --date 2024-03-15
 pocketsmith categories create --title "Groceries" --parent-id <id>
+pocketsmith category-rules create --category <id> --payee-matches "NEW WORLD"
+# Category rules can only be listed and created via the API;
+# edit or delete rules in the PocketSmith web app.
 pocketsmith institutions create --title "My Bank" --currency NZD
 pocketsmith transactions update <id> --category <category-id>
 pocketsmith transactions update <id> --no-needs-review   # Mark reviewed
