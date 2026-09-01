@@ -21,7 +21,7 @@ beforeEach(() => {
 });
 
 describe('remaining resource tools', () => {
-  it('exposes exactly the 24 designed tools', async () => {
+  it('exposes exactly the 26 designed tools', async () => {
     const client = await createClient();
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();
@@ -32,6 +32,7 @@ describe('remaining resource tools', () => {
         'list_accounts', 'get_account',
         'list_transactions', 'get_transaction', 'create_transaction', 'update_transaction',
         'list_categories', 'get_category', 'create_category', 'update_category',
+        'list_category_rules', 'create_category_rule',
         'list_budgets', 'get_budget_summary', 'get_budget_trend_analysis',
         'list_events', 'get_event', 'update_event',
         'list_institutions', 'get_institution',

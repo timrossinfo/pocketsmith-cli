@@ -3,6 +3,7 @@ import { registerMeTools } from './tools/me.js';
 import { registerAccountsTools } from './tools/accounts.js';
 import { registerTransactionsTools } from './tools/transactions.js';
 import { registerCategoriesTools } from './tools/categories.js';
+import { registerCategoryRulesTools } from './tools/category-rules.js';
 import { registerBudgetsTools } from './tools/budgets.js';
 import { registerEventsTools } from './tools/events.js';
 import { registerInstitutionsTools } from './tools/institutions.js';
@@ -16,6 +17,7 @@ export function createServer(): McpServer {
   registerAccountsTools(server);
   registerTransactionsTools(server);
   registerCategoriesTools(server);
+  registerCategoryRulesTools(server);
   registerBudgetsTools(server);
   registerEventsTools(server);
   registerInstitutionsTools(server);
