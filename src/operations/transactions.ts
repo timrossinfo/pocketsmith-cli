@@ -8,6 +8,8 @@ export interface TransactionFilters {
   startDate?: string;
   endDate?: string;
   search?: string;
+  needsReview?: boolean;
+  uncategorized?: boolean;
   perPage?: number | string;
   userId?: string;
 }
@@ -27,6 +29,8 @@ function transactionsParams(filters: TransactionFilters) {
     start_date: filters.startDate,
     end_date: filters.endDate,
     search: filters.search,
+    needs_review: filters.needsReview ? 1 : undefined,
+    uncategorised: filters.uncategorized ? 1 : undefined,
     per_page: filters.perPage,
   };
 }
@@ -79,6 +83,7 @@ export interface UpdateTransactionInput {
   note?: string;
   categoryId?: number;
   isTransfer?: boolean;
+  needsReview?: boolean;
 }
 
 export function updateTransaction(
@@ -92,6 +97,7 @@ export function updateTransaction(
   if (input.note !== undefined) body.note = input.note;
   if (input.categoryId != null) body.category_id = input.categoryId;
   if (input.isTransfer !== undefined) body.is_transfer = input.isTransfer;
+  if (input.needsReview !== undefined) body.needs_review = input.needsReview;
 
   return api.put<Transaction>(`/transactions/${id}`, body);
 }

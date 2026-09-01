@@ -30,6 +30,8 @@ export function registerTransactionsCommands(program: Command) {
     .option('--since <date>', 'Start date (YYYY-MM-DD)')
     .option('--until <date>', 'End date (YYYY-MM-DD)')
     .option('--search <term>', 'Search term')
+    .option('--needs-review', 'Only transactions needing review')
+    .option('--uncategorized', 'Only uncategorized transactions')
     .option('--page <n>', 'Page number')
     .option('--per-page <n>', 'Results per page (10-100)')
     .option('--all', 'Fetch all pages')
@@ -51,6 +53,8 @@ export function registerTransactionsCommands(program: Command) {
         startDate: opts.since,
         endDate: opts.until,
         search: opts.search,
+        needsReview: opts.needsReview,
+        uncategorized: opts.uncategorized,
         perPage: opts.perPage,
         userId: globalOpts.userId,
       };
@@ -107,6 +111,8 @@ export function registerTransactionsCommands(program: Command) {
     .option('--note <note>', 'Transaction note')
     .option('--category <id>', 'Category ID')
     .option('--is-transfer', 'Mark as transfer')
+    .option('--needs-review', 'Flag as needing review')
+    .option('--no-needs-review', 'Clear the needs-review flag')
     .action(async (id: string, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
       const data = await updateTransaction(id, {
@@ -116,6 +122,7 @@ export function registerTransactionsCommands(program: Command) {
         note: opts.note,
         categoryId: opts.category ? parseInt(opts.category, 10) : undefined,
         isTransfer: opts.isTransfer,
+        needsReview: opts.needsReview,
       });
       console.log(formatOutput(data, { json: globalOpts.json }));
     });

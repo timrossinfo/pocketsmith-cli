@@ -116,6 +116,38 @@ describe('transactions commands', () => {
       );
     });
 
+    it('passes needs_review param when --needs-review is set', async () => {
+      vi.mocked(api.paginated).mockResolvedValue({
+        data: [],
+        totalPages: 1,
+        currentPage: 1,
+      });
+
+      const program = createProgram();
+      await program.parseAsync(['node', 'test', 'transactions', 'list', '--needs-review']);
+
+      expect(api.paginated).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ needs_review: 1 }),
+      );
+    });
+
+    it('passes uncategorised param when --uncategorized is set', async () => {
+      vi.mocked(api.paginated).mockResolvedValue({
+        data: [],
+        totalPages: 1,
+        currentPage: 1,
+      });
+
+      const program = createProgram();
+      await program.parseAsync(['node', 'test', 'transactions', 'list', '--uncategorized']);
+
+      expect(api.paginated).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ uncategorised: 1 }),
+      );
+    });
+
     it('uses fetchAll when --all flag is set', async () => {
       vi.mocked(api.fetchAll).mockResolvedValue([{ id: 1 }, { id: 2 }]);
 
@@ -212,6 +244,42 @@ describe('transactions commands', () => {
       ]);
 
       expect(api.put).toHaveBeenCalledWith('/transactions/1', { payee: 'Updated Payee' });
+    });
+
+    it('sets needs_review true when --needs-review is passed', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1 });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'transactions', 'update', '1',
+        '--needs-review',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/transactions/1', { needs_review: true });
+    });
+
+    it('sets needs_review false when --no-needs-review is passed', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1 });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'transactions', 'update', '1',
+        '--no-needs-review',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/transactions/1', { needs_review: false });
+    });
+
+    it('leaves needs_review unchanged when neither flag is passed', async () => {
+      vi.mocked(api.put).mockResolvedValue({ id: 1 });
+
+      const program = createProgram();
+      await program.parseAsync([
+        'node', 'test', 'transactions', 'update', '1',
+        '--note', 'hello',
+      ]);
+
+      expect(api.put).toHaveBeenCalledWith('/transactions/1', { note: 'hello' });
     });
   });
 
