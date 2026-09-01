@@ -56,6 +56,21 @@ describe('transactions tools', () => {
     expect(api.paginated).toHaveBeenCalledWith('/accounts/5/transactions', expect.anything());
   });
 
+  it('list_transactions passes review and category filters as API params', async () => {
+    vi.mocked(api.paginated).mockResolvedValue({ data: [], totalPages: 1, currentPage: 1 });
+
+    const client = await createClient();
+    await client.callTool({
+      name: 'list_transactions',
+      arguments: { needs_review: true, uncategorized: true },
+    });
+
+    expect(api.paginated).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ needs_review: 1, uncategorised: 1 }),
+    );
+  });
+
   it('create_transaction posts the mapped body', async () => {
     vi.mocked(api.post).mockResolvedValue({ id: 99 });
 
@@ -89,6 +104,18 @@ describe('transactions tools', () => {
     });
 
     expect(api.put).toHaveBeenCalledWith('/transactions/99', { category_id: 12 });
+  });
+
+  it('update_transaction can clear the needs_review flag', async () => {
+    vi.mocked(api.put).mockResolvedValue({ id: 99 });
+
+    const client = await createClient();
+    await client.callTool({
+      name: 'update_transaction',
+      arguments: { id: 99, needs_review: false },
+    });
+
+    expect(api.put).toHaveBeenCalledWith('/transactions/99', { needs_review: false });
   });
 
   it('rejects per_page outside 10-100', async () => {

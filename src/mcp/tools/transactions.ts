@@ -15,6 +15,8 @@ const listTransactionsInput = z.object({
   start_date: z.string().optional().describe('Start date (YYYY-MM-DD)'),
   end_date: z.string().optional().describe('End date (YYYY-MM-DD)'),
   search: z.string().optional().describe('Search term matched against payee, note, and labels'),
+  needs_review: z.boolean().optional().describe('Only return transactions flagged as needing review'),
+  uncategorized: z.boolean().optional().describe('Only return transactions without a category'),
   page: z.number().int().min(1).optional().describe('Page number'),
   per_page: z.number().int().min(10).max(100).optional().describe('Results per page (10-100)'),
 });
@@ -44,6 +46,10 @@ const updateTransactionInput = z.object({
   note: z.string().optional().describe('Note'),
   category_id: z.number().int().optional().describe('Category ID'),
   is_transfer: z.boolean().optional().describe('Mark as a transfer'),
+  needs_review: z
+    .boolean()
+    .optional()
+    .describe('Set the needs-review flag (false marks the transaction as reviewed)'),
 });
 
 export function registerTransactionsTools(server: McpServer) {
@@ -52,7 +58,7 @@ export function registerTransactionsTools(server: McpServer) {
     {
       title: 'List Transactions',
       description:
-        'List transactions, optionally filtered by account, category, transaction account, date range, or search term. Paginated: returns data, current_page, and total_pages.',
+        'List transactions, optionally filtered by account, category, transaction account, date range, search term, review status, or missing category. Paginated: returns data, current_page, and total_pages.',
       inputSchema: listTransactionsInput.shape,
       annotations: { readOnlyHint: true },
     },
@@ -64,6 +70,8 @@ export function registerTransactionsTools(server: McpServer) {
         startDate: args.start_date,
         endDate: args.end_date,
         search: args.search,
+        needsReview: args.needs_review,
+        uncategorized: args.uncategorized,
         page: args.page,
         perPage: args.per_page,
       });
@@ -107,7 +115,7 @@ export function registerTransactionsTools(server: McpServer) {
     {
       title: 'Update Transaction',
       description:
-        'Update fields on an existing transaction (payee, amount, date, note, category, transfer flag). Only provided fields are changed.',
+        'Update fields on an existing transaction (payee, amount, date, note, category, transfer flag, needs-review flag). Only provided fields are changed.',
       inputSchema: updateTransactionInput.shape,
       annotations: { readOnlyHint: false, destructiveHint: false },
     },
@@ -119,6 +127,7 @@ export function registerTransactionsTools(server: McpServer) {
         note: args.note,
         categoryId: args.category_id,
         isTransfer: args.is_transfer,
+        needsReview: args.needs_review,
       }),
     ),
   );
