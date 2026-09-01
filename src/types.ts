@@ -82,6 +82,14 @@ export interface Category {
   updated_at: string;
 }
 
+export interface CategoryRule {
+  id: number;
+  payee_matches: string;
+  category: Category;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface BudgetEvent {
   category: {
     id: number;
